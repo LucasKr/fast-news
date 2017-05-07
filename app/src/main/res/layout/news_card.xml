@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="5px">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/addFavorito"
+        android:layout_alignParentTop="true"
+        android:layout_toStartOf="@+id/addFavorito"
+        android:text="Titulo"
+        android:textAlignment="viewStart"
+        android:textAllCaps="false"
+        android:textStyle="bold" />
+
+    <ImageButton
+        android:id="@+id/addFavorito"
+        style="@android:style/Widget.DeviceDefault.Light.CompoundButton.Star"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:padding="20px"
+        android:src="@mipmap/favorites48px" />
+
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/title"
+        android:layout_toStartOf="@+id/addFavorito"
+        android:text="Descrição reportagem" />
+
+    <TextView
+        android:id="@+id/author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/description"
+        android:padding="20px"
+        android:text="Author"
+        android:textAlignment="textEnd" />
+
+</RelativeLayout>
