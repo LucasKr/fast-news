@@ -1,19 +1,23 @@
 package com.fastnews.fastnews;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.fastnews.fastnews.actions.FavoriteAction;
 import com.fastnews.fastnews.actions.RenderNewsAction;
+import com.fastnews.fastnews.models.ListNewsModel;
 import com.fastnews.fastnews.models.NewsModel;
 
 import org.json.JSONArray;
@@ -32,16 +36,24 @@ public class ListNewsActivity extends AppCompatActivity {
     private List<NewsModel> news = new ArrayList<NewsModel>();
     private List<NewsModel> favorites = new ArrayList<NewsModel>();
 
+    private RenderNewsAction renderNewsAction = new RenderNewsAction() {
+        @Override
+        public void renderNewsDay() {
+            recyclerView.getAdapter().notifyDataSetChanged();
+        }
+    };
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitle("Fast News - Daily News");
         setContentView(R.layout.activity_list_news);
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-
 
         queue = Volley.newRequestQueue(this);
 
@@ -65,17 +77,11 @@ public class ListNewsActivity extends AppCompatActivity {
                         newsModel.setPublishedAt(article.getString("publishedAt"));
                         news.add(newsModel);
                     }
-                }catch (JSONException e) {
+                } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
 
                 renderNews();
-
-                TextView emptyData = (TextView) findViewById(R.id.emptyData);
-                if(news.size() != 0)
-                    emptyData.setText("");
-                else
-                    emptyData.setText("Noticias não foram encontradas... Tente novamente mais tarde.");
             }
 
         }, new Response.ErrorListener() {
@@ -83,6 +89,7 @@ public class ListNewsActivity extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 TextView emptyData = (TextView) findViewById(R.id.emptyData);
                 emptyData.setText("Erro ao carregar seu feed de noticias!");
+                Log.d("ListNewsActivity ERROR", error.getMessage());
             }
         });
 
@@ -92,15 +99,57 @@ public class ListNewsActivity extends AppCompatActivity {
     }
 
     private void renderNews(){
-        RecyclerView.Adapter newsAdapter = new NewsAdapter(news, new RenderNewsAction() {
+        RecyclerView.Adapter newsAdapter = new NewsAdapter(news, renderNewsAction, new FavoriteAction() {
             @Override
-            public void renderNewsDay(int position) {
-                favorites.add(news.get(position));
-                news.remove(position);
-                renderNews();
+            public void addToFavorites(NewsModel newsModel) {
+                news.remove(newsModel);
+                favorites.add(newsModel);
             }
         });
         recyclerView.setAdapter(newsAdapter);
+
+
+        TextView emptyData = (TextView) findViewById(R.id.emptyData);
+        if(news.size() != 0)
+            emptyData.setText("");
+        else
+            emptyData.setText("Noticias não foram encontradas... Tente novamente mais tarde.");
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_list_news, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.verFavoritos) {
+            Intent intent = new Intent(this, ListFavoriteActivity.class);
+            ListNewsModel listNewsModelFav = new ListNewsModel(favorites);
+            ListNewsModel listNewsModel = new ListNewsModel(news);
+            intent.putExtra("favorites", listNewsModelFav);
+            intent.putExtra("news", listNewsModel);
+            startActivityForResult(intent,  ActivityActions.FAVORITES.ordinal());
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(ActivityActions.FAVORITES.ordinal() == resultCode) {
+            ListNewsModel listnewsModel = (ListNewsModel) data.getSerializableExtra("news");
+            news = listnewsModel.models;
+
+            ListNewsModel listFavoritesModel = (ListNewsModel) data.getSerializableExtra("favorites");
+            favorites = listFavoritesModel.models;
+
+            renderNews();
+        }
     }
 
     @Override

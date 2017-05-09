@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.fastnews.fastnews.actions.FavoriteAction;
 import com.fastnews.fastnews.actions.RenderNewsAction;
 import com.fastnews.fastnews.models.NewsModel;
 
@@ -16,11 +17,13 @@ import java.util.List;
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsHolder> {
 
     private List<NewsModel> news;
-    protected  RenderNewsAction renderNewsAction;
+    protected RenderNewsAction renderNewsAction;
+    protected FavoriteAction favoriteAction;
 
-    public NewsAdapter(List<NewsModel> newsModelList, RenderNewsAction renderNewsAction) {
+    public NewsAdapter(List<NewsModel> newsModelList, RenderNewsAction renderNewsAction, FavoriteAction favoriteAction) {
         this.news = newsModelList;
         this.renderNewsAction = renderNewsAction;
+        this.favoriteAction = favoriteAction;
     }
 
     public class NewsHolder extends RecyclerView.ViewHolder {
@@ -47,7 +50,8 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsHolder> {
         addFavorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                renderNewsAction.renderNewsDay(position);
+                favoriteAction.addToFavorites(news.get(position));
+                renderNewsAction.renderNewsDay();
             }
         });
 

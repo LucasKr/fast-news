@@ -1,10 +1,12 @@
 package com.fastnews.fastnews.models;
 
+import java.io.Serializable;
+
 /**
  * Created by lucask on 07/05/17.
  */
 
-public class NewsModel {
+public class NewsModel implements Serializable {
     private String title;
     private String author;
     private String description;

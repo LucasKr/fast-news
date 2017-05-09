@@ -6,6 +6,6 @@ package com.fastnews.fastnews.actions;
 
 public interface RenderNewsAction {
 
-    void renderNewsDay(int positionToRemove);
+    void renderNewsDay();
 
 }
