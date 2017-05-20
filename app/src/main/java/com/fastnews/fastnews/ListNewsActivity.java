@@ -15,6 +15,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.fastnews.fastnews.actions.Actions;
 import com.fastnews.fastnews.actions.FavoriteAction;
 import com.fastnews.fastnews.actions.RenderNewsAction;
 import com.fastnews.fastnews.models.ListNewsModel;
@@ -59,42 +60,12 @@ public class ListNewsActivity extends AppCompatActivity {
 
         String url = "https://newsapi.org/v1/articles?source=bbc-sport&sortBy=top&apiKey=13461edad0894f3c88aaed55661947fb";
 
-        StringRequest stringRequest = new StringRequest(StringRequest.Method.GET, url, new Response.Listener<String>() {
-
+        StringRequest stringRequest  = Actions.listNewsFromAPI(url, Actions.REQUEST_NEWS, news, new RenderNewsAction() {
             @Override
-            public void onResponse(String response) {
-                try {
-                    JSONObject jsonObject = new JSONObject(response);
-                    JSONArray articles = jsonObject.getJSONArray("articles");
-                    for(int i = 0; i < articles.length(); i ++) {
-                        JSONObject article = articles.getJSONObject(i);
-                        NewsModel newsModel = new NewsModel();
-                        newsModel.setAuthor(article.getString("author"));
-                        newsModel.setTitle(article.getString("title"));
-                        newsModel.setDescription(article.getString("description"));
-                        newsModel.setUrl(article.getString("url"));
-                        newsModel.setUrlToImage(article.getString("urlToImage"));
-                        newsModel.setPublishedAt(article.getString("publishedAt"));
-                        news.add(newsModel);
-                    }
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-
+            public void renderNewsDay() {
                 renderNews();
             }
-
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                TextView emptyData = (TextView) findViewById(R.id.emptyData);
-                emptyData.setText("Erro ao carregar seu feed de noticias!");
-                Log.d("ListNewsActivity ERROR", error.getMessage());
-            }
         });
-
-        stringRequest.setTag(REQUEST_BBC_SPORTS);
-
         queue.add(stringRequest);
     }
 
@@ -134,6 +105,11 @@ public class ListNewsActivity extends AppCompatActivity {
             startActivityForResult(intent,  ActivityActions.FAVORITES.ordinal());
             return true;
         }
+        else if (item.getItemId() == R.id.verChat) {
+            Intent intent = new Intent(this, ChatActivity.class);
+            startActivityForResult(intent,  ActivityActions.CHAT.ordinal());
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -147,6 +123,13 @@ public class ListNewsActivity extends AppCompatActivity {
 
             ListNewsModel listFavoritesModel = (ListNewsModel) data.getSerializableExtra("favorites");
             favorites = listFavoritesModel.models;
+
+            renderNews();
+        }
+
+        if(ActivityActions.CHAT.ordinal() == resultCode) {
+            ListNewsModel listnewsModel = (ListNewsModel) data.getSerializableExtra("news");
+            news = listnewsModel.models;
 
             renderNews();
         }

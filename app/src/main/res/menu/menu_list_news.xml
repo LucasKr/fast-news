@@ -8,4 +8,10 @@
         android:icon="@drawable/ic_star_rate_black_18dp"
         app:showAsAction="always"/>
 
+    <item
+        android:id="@+id/verChat"
+        android:title="Chat Bot"
+        android:icon="@drawable/ic_chat_black_24dp"
+        app:showAsAction="always"
+        />
 </menu>

@@ -6,10 +6,11 @@
         android:id="@+id/sendEmailButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button"
+        android:text="Enviar lista para email"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:onClick="sendMail"/>
 
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"

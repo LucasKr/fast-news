@@ -6,5 +6,6 @@ package com.fastnews.fastnews;
 
 public enum ActivityActions {
     FAVORITES,
-    NEWS
+    NEWS,
+    CHAT
 }
