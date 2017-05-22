@@ -23,30 +23,38 @@ import com.fastnews.fastnews.models.NewsModel;
 import java.util.ArrayList;
 import java.util.List;
 
+import ai.api.AIListener;
 import ai.api.android.AIConfiguration;
 import ai.api.AIDataService;
 import ai.api.AIServiceException;
+import ai.api.android.AIService;
+import ai.api.model.AIError;
 import ai.api.model.AIRequest;
 import ai.api.model.AIResponse;
 import ai.api.model.Result;
 
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity implements AIListener {
 
     private EditText msgToBot;
     private Button btnSendMessage;
     private ListView msgsListView;
     private List<NewsModel> newsFound = new ArrayList<>();
 
+    private boolean gravando = false;
+
 
     private List<String> msgs;
     private RequestQueue queue;
+
 
     private final AIConfiguration config = new AIConfiguration("eedb4f43cf6b4c5cb1302d9d7cea7d89",
             AIConfiguration.SupportedLanguages.PortugueseBrazil,
             AIConfiguration.RecognitionEngine.System);
 
     private AIDataService aiDataService;
+
+    private AIService service;
 
     private void log(String msgLog) {
         Log.d("ChatActivity", msgLog);
@@ -76,11 +84,26 @@ public class ChatActivity extends AppCompatActivity {
         intent.putExtra("news", listNewsModel);
         setResult(ActivityActions.CHAT.ordinal(), intent);
 
+        service = AIService.getService(this, config);
+        service.setListener(this);
+
+        gravando = false;
     }
 
     public void sendRequest(View view) {
-        btnSendMessage.setEnabled(false);
+
         String msg = msgToBot.getText().toString();
+
+        sendRequest(msg);
+    }
+
+    public void sendRequest(String msg) {
+        if(msg == null || msg.isEmpty())
+            return;
+
+        btnSendMessage.setEnabled(false);
+        msgToBot.setEnabled(false);
+
         addMsgToListView(msg);
 
         final AIRequest request = new AIRequest();
@@ -120,6 +143,21 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
+    public void watchRecord(View view) {
+        if(!gravando) {
+            service.startListening();
+            btnSendMessage.setEnabled(false);
+            msgToBot.setEnabled(false);
+        }
+        else {
+            btnSendMessage.setEnabled(true);
+            msgToBot.setEnabled(true);
+            service.stopListening();
+        }
+
+        gravando = !gravando;
+    }
+
     private void addMsgToListView(String msg) {
         msgs.add(msg);
         ((BaseAdapter) msgsListView.getAdapter()).notifyDataSetChanged();
@@ -140,5 +178,57 @@ public class ChatActivity extends AppCompatActivity {
         if (queue != null) {
             queue.cancelAll(Actions.REQUEST_NEWS);
         }
+    }
+
+    @Override
+    public void onResult(final AIResponse response) {
+        Log.d("ChatActivity", response.toString());
+        String msg = response.getResult().getResolvedQuery();
+        sendRequest(msg);
+    }
+
+    @Override
+    public void onError(final AIError error) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d("ChatActivity", error.toString());
+            }
+        });
+    }
+
+    @Override
+    public void onListeningFinished() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d("ChatActivity", "Finishing the listenner");
+            }
+        });
+    }
+
+    @Override
+    public void onListeningCanceled() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d("ChatActivity", "On listening canceled...");
+            }
+        });
+    }
+
+    @Override
+    public void onListeningStarted() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d("ChatActivity", "Listening started...");
+            }
+        });
+    }
+
+    @Override
+    public void onAudioLevel(float level) {
+
     }
 }

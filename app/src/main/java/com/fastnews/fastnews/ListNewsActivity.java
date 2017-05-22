@@ -58,6 +58,10 @@ public class ListNewsActivity extends AppCompatActivity {
 
         queue = Volley.newRequestQueue(this);
 
+        searchForNewsSports();
+    }
+
+    public void searchForNewsSports() {
         String url = "https://newsapi.org/v1/articles?source=bbc-sport&sortBy=top&apiKey=13461edad0894f3c88aaed55661947fb";
 
         StringRequest stringRequest  = Actions.listNewsFromAPI(url, Actions.REQUEST_NEWS, news, new RenderNewsAction() {
@@ -120,18 +124,19 @@ public class ListNewsActivity extends AppCompatActivity {
         if(ActivityActions.FAVORITES.ordinal() == resultCode) {
             ListNewsModel listnewsModel = (ListNewsModel) data.getSerializableExtra("news");
             news = listnewsModel.models;
-
             ListNewsModel listFavoritesModel = (ListNewsModel) data.getSerializableExtra("favorites");
             favorites = listFavoritesModel.models;
-
             renderNews();
         }
 
         if(ActivityActions.CHAT.ordinal() == resultCode) {
             ListNewsModel listnewsModel = (ListNewsModel) data.getSerializableExtra("news");
             news = listnewsModel.models;
-
-            renderNews();
+            if(news.isEmpty()) {
+                searchForNewsSports();
+            } else {
+                renderNews();
+            }
         }
     }
 
